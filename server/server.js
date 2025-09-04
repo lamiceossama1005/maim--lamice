@@ -1,0 +1,75 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Database connection
+const connectDB = async () => {
+  try {
+    // For development, we'll use a local MongoDB connection
+    // In production, this would be MongoDB Atlas
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/eventx-studio';
+    await mongoose.connect(mongoURI);
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
+
+// Routes (use existing implemented routes under src/)
+const authRoutes = require('./src/routes/auth');
+const eventRoutes = require('./src/routes/events');
+const ticketRoutes = require('./src/routes/tickets');
+const analyticsRoutes = require('./src/routes/analytics');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+// Basic route
+app.get('/', (req, res) => {
+  res.json({ message: 'EventX Studio API is running!' });
+});
+
+// Health/info
+app.get('/api', (req, res) => {
+  res.json({ ok: true, routes: ['/api/auth', '/api/events', '/api/tickets', '/api/analytics'] });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!' });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+// Start server
+const startServer = async () => {
+  await connectDB();
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+};
+
+startServer();
+
