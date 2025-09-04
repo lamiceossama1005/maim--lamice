@@ -16,6 +16,7 @@ export default function Login() {
       const res = await API.post('/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       setToken(res.data.token);
+      try { window.dispatchEvent(new Event('auth-changed')); } catch (e) { }
       nav('/');
     } catch (err) {
       const msg = err?.response?.data?.msg || err?.response?.data?.error || err.message || 'Login failed';
@@ -29,6 +30,7 @@ export default function Login() {
       const res = await API.post('/auth/login', creds);
       localStorage.setItem('token', res.data.token);
       setToken(res.data.token);
+      try { window.dispatchEvent(new Event('auth-changed')); } catch (e) { }
       nav('/');
     } catch (err) {
       const msg = err?.response?.data?.msg || err?.response?.data?.error || err.message || 'Login failed';
