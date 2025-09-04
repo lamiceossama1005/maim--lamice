@@ -5,14 +5,29 @@ import API, { setToken } from './api'
 export default function App() {
   const nav = useNavigate();
   const [user, setUser] = React.useState(null);
-  React.useEffect(() => {
+  const loadUser = React.useCallback(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      setUser(null);
+      return;
+    }
     setToken(token);
     API.get('/auth/me').then(r => setUser(r.data)).catch(() => setUser(null));
   }, []);
+
+  React.useEffect(() => {
+    loadUser();
+    const onAuthChanged = () => loadUser();
+    window.addEventListener('storage', onAuthChanged);
+    window.addEventListener('auth-changed', onAuthChanged);
+    return () => {
+      window.removeEventListener('storage', onAuthChanged);
+      window.removeEventListener('auth-changed', onAuthChanged);
+    }
+  }, [loadUser]);
   const onLogout = () => {
     try { localStorage.removeItem('token'); setToken(null); } catch (e) { }
+    try { window.dispatchEvent(new Event('auth-changed')); } catch (e) { }
     nav('/login');
   }
   const isAuthed = typeof window !== 'undefined' && !!localStorage.getItem('token');
