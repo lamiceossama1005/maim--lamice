@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+@layer components {
+    .btn-primary {
+        @apply px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed;
+    }
+
+    .btn-secondary {
+        @apply px-4 py-2 rounded border border-gray-300 hover:bg-gray-50;
+    }
+
+    .card {
+        @apply bg-white rounded-lg border shadow-sm;
+    }
+
+    .input {
+        @apply border rounded p-3;
+    }
+
+    .heading-2 {
+        @apply text-2xl font-bold;
+    }
+}
